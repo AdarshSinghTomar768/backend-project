@@ -5,6 +5,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponce.js";
 
 
+
 const registerUser = asyncHandler(async (req, res) => {
     // res.status(200).json({ message: "ok" })
 
@@ -26,7 +27,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError("All fields are mandatory", 400);
     }
 
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [
             { username },
             { email }
@@ -39,7 +40,12 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
     const avtarLocalPath = req.files?.avtar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;  //both are now in server and not in cloudinary
+    //const coverImageLocalPath = req.files?.coverImage[0]?.path;  //both are now in server and not in cloudinary
+
+    let coverImageLocalPath;
+    if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
 
     if (!avtarLocalPath) { //cover image is optional
         throw new ApiError("Please upload avtar", 400);

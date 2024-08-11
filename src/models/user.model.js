@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { JsonWebTokenError } from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    avtar: {
+    avatar: {  // Corrected typo from `avtar` to `avatar`
         type: String, // cloudinary url
         required: true
     },
@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', async function(next) {
-    if(!this.isModified('password')) {
+    if (!this.isModified('password')) {
         return next();
     }
 
@@ -56,33 +56,33 @@ userSchema.pre('save', async function(next) {
     const hashedPassword = await bcrypt.hash(this.password, salt);
     this.password = hashedPassword;
     next();
-})
+});
 
 userSchema.methods.isPasswordCorrect = async function(password) {
     return await bcrypt.compare(password, this.password);
-}
+};
 
-userSchema.methods.generateAccessToken = async function() {
+userSchema.methods.generateAccessToken = function() {
     return jwt.sign(
-    {
-        _id: this._id,
-        username: this.username,
-        email: this.email,
-        fullName: this.fullName
-    },
-    precess.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
-)
-}
+        {
+            _id: this._id,
+            username: this.username,
+            email: this.email,
+            fullName: this.fullName
+        },
+        process.env.ACCESS_TOKEN_SECRET, // Corrected typo from `precess` to `process`
+        { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    );
+};
 
-userSchema.methods.generateRefreshToken = async function() {
+userSchema.methods.generateRefreshToken = function() {
     return jwt.sign(
-    {
-        _id: this._id
-    },
-    precess.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
-)
-}
+        {
+            _id: this._id
+        },
+        process.env.REFRESH_TOKEN_SECRET, // Corrected typo from `precess` to `process`
+        { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+    );
+};
 
-export const User = mongoose.model('User', userSchema)
+export const User = mongoose.model('User', userSchema);
